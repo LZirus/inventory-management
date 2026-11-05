@@ -8,7 +8,7 @@ Erzeugt mit dem Projekt-Skill `vue-component-analyzer` (Pre-Scan `scan.mjs` + ma
 2. **O(n²) beim Rendern des Balkendiagramms** (`Reports.vue:55` → `getBarHeight`, L254): Für jeden Balken läuft eine Schleife über alle Monate, um das Maximum zu finden, dazu ein `console.log` pro Aufruf. → `maxRevenue` und `barHeights` als `computed`, im Template nur nachschlagen.
 3. **`formatDate` siebenfach kopiert** (Restocking, Orders, Dashboard, Spending, drei Modals): Fast identische Funktionen mit kleinen Abweichungen. → `client/src/utils/format.js` mit `formatDate`, `formatNumber`, `formatMoney`, an `currentLocale` gekoppelt (z. B. Composable `useFormatters()`).
 
-## client/src/views/Restocking.vue (607 Zeilen: template 128 / script 163 / style 313)
+## client/src/views/Restocking.vue (606 Zeilen: template 128 / script 163 / style 313)
 
 | Schwere | Kategorie | Ort | Befund | Vorschlag |
 |---------|-----------|-----|--------|-----------|
@@ -20,7 +20,7 @@ Erzeugt mit dem Projekt-Skill `vue-component-analyzer` (Pre-Scan `scan.mjs` + ma
 
 Verworfen nach Prüfung: `setTimeout` wird über `debounceTimer` und `onBeforeUnmount` sauber geräumt; `:style` an L23 setzt nur eine CSS-Variable, ist unkritisch.
 
-## client/src/views/Reports.vue (487 Zeilen: template 125 / script 191 / style 168)
+## client/src/views/Reports.vue (486 Zeilen: template 125 / script 191 / style 168)
 
 | Schwere | Kategorie | Ort | Befund | Vorschlag |
 |---------|-----------|-----|--------|-----------|
@@ -30,13 +30,11 @@ Verworfen nach Prüfung: `setTimeout` wird über `debounceTimer` und `onBeforeUn
 | Mittel | Projektregel | L127 | Options API (`data`, `methods`, `mounted`) | Auf `setup()` umstellen wie die anderen Views |
 | Mittel | Projektregel | L156, L162 | `axios.get('http://localhost:8001/...')` am `api.js` vorbei, Requests sequenziell | `api.getQuarterlyReport()`/`getMonthlyTrends()` in `api.js`, parallel per `Promise.all` |
 | Mittel | Projektregel | Template | Kein `t()`, alle Texte hart codiert Englisch | `useI18n` wie in den anderen Views |
-| Mittel | Projektregel | L145–256 | 15× `console.log` | Entfernen; Fehler per `console.error` |
+| Mittel | Projektregel | L145–256 | 13× `console.log` | Entfernen; Fehler per `console.error` |
 | Niedrig | Wiederverwendung | L214–252 | Eigenes `formatNumber` mit Handschleife statt `toLocaleString`; `formatMonth` mit fest englischen Monatsnamen | `useFormatters()` verwenden |
 | Niedrig | Wiederverwendung | Style | `.stat-value` identisch in `BacklogDetailModal.vue`, `InventoryDetailModal.vue` | Kleine `StatCell.vue` oder globale Klasse |
 
-Hinweis: Die Reports-Bugs werden parallel in einer eigenen Session behoben; diese Liste ist nur Input dafür.
-
-## client/src/components/FilterBar.vue (607 Zeilen: template 110 / script 178 / style 316)
+## client/src/components/FilterBar.vue (606 Zeilen: template 110 / script 178 / style 316)
 
 | Schwere | Kategorie | Ort | Befund | Vorschlag |
 |---------|-----------|-----|--------|-----------|
@@ -52,4 +50,4 @@ Keine Performance-Befunde: `fields` und `activeFilters` sind `computed`, Keys si
 - Lade-/Fehler-Boilerplate (`loading`, `error`, try/finally) in jeder View → optional `useAsyncData()`
 
 ## Nächster Schritt
-Zuerst Top 1 (sichtbarer Anzeigefehler bei JPY) und Top 3 zusammen als ein Refactoring über `vue-expert` umsetzen; Reports-Punkte an die Reports-Session geben.
+Zuerst Top 1 (sichtbarer Anzeigefehler bei JPY) und Top 3 zusammen als ein Refactoring über `vue-expert` umsetzen; danach die Reports-Punkte.

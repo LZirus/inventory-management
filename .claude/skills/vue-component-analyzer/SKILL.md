@@ -12,7 +12,9 @@ repo `CLAUDE.md` they go through the `vue-expert` subagent.
 ## Workflow
 
 1. **Pick targets.** Use the files the user named. If they named none, ask, or take the
-   views changed on the current branch (`git diff --name-only main -- '*.vue'`).
+   views changed on the current branch against its base branch
+   (`git diff --name-only <base>...HEAD -- '*.vue'`; take `<base>` from the open PR,
+   e.g. `gh pr view --json baseRefName`, or ask; do not assume `main`).
 
 2. **Mechanical pre-scan.** From the repo root:
    ```bash
@@ -38,12 +40,14 @@ repo `CLAUDE.md` they go through the `vue-expert` subagent.
    | Project rules | `CLAUDE.md` + `client/CLAUDE.md`: no index keys, validate dates before `getMonth()`, Composition API only, no emojis in UI, user-facing text through `t()` (`useI18n`), loading and error states shown |
 
 5. **Rate severity.**
-   - **Hoch**: real bug or measurable cost (wrong DOM reuse from index keys on a list that changes, leak, O(n²) per render).
+   - **Hoch**: real bug, user-visible bug, or measurable cost (wrong DOM reuse from index keys on a list that changes, leak, O(n²) per render).
    - **Mittel**: rule violation or duplication across 3+ files.
    - **Niedrig**: style, small cleanup, "nice to have".
 
-6. **Write the report** (format below) in the conversation, in the user's language,
-   **and** save it to `docs/reports/vue-analysis-<YYYY-MM-DD>.md` (overwrite if it exists
+6. **Write the report** (format below) in the conversation, in the user's language.
+   The scanner's labels (`Struktur`, `Projektregel`, ...) and the template below are
+   German; translate headings, labels and severities if the user writes in another language.
+   Show the report in the chat **and** save it to `docs/reports/vue-analysis-<YYYY-MM-DD>.md` (overwrite if it exists
    for the same day; one file covers all components analyzed in the run).
 
 ## Report format

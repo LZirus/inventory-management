@@ -8,11 +8,15 @@
 // judge: every hit is a candidate that Claude verifies by reading the code.
 // No dependencies, so it runs in any checkout without npm install.
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 
 const ROOT = process.cwd()
 const SRC = join(ROOT, 'client', 'src')
+if (!existsSync(SRC)) {
+  console.error(`client/src nicht gefunden unter ${ROOT}. Bitte aus dem Repo-Root starten.`)
+  process.exit(1)
+}
 const targets = process.argv.slice(2).map(p => resolve(p))
 if (targets.length === 0) {
   console.error('Usage: scan.mjs <file.vue> [more.vue ...]')
@@ -33,6 +37,9 @@ function listVue(dir) {
 }
 
 // Returns {content, startLine} of the first <tag ...>...</tag> block.
+// Simple by design: it spans from the first <tag to the LAST </tag>, so a
+// literal "</script>" inside a string or a second <style> block gets merged.
+// Good enough for this repo's SFCs; use @vue/compiler-sfc if that changes.
 function block(src, tag) {
   const open = src.search(new RegExp(`<${tag}[\\s>]`))
   if (open < 0) return { content: '', startLine: 0, lines: 0 }
@@ -53,7 +60,8 @@ function lineHits(text, startLine, re) {
 // Function names declared in <script> (arrow consts and function declarations).
 function declaredFunctions(script) {
   const names = new Set()
-  for (const m of script.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g)) names.add(m[1])
+  // Matches `(a, b) =>`, `() =>`, `x =>` and their `async` forms.
+  for (const m of script.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s+)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>/g)) names.add(m[1])
   for (const m of script.matchAll(/function\s+([A-Za-z_$][\w$]*)\s*\(/g)) names.add(m[1])
   return names
 }
@@ -70,7 +78,8 @@ function cssRules(style) {
 }
 
 function analyse(file) {
-  const src = readFileSync(file, 'utf8')
+  // Drop the final newline so line counts match `wc -l`.
+  const src = readFileSync(file, 'utf8').replace(/\n$/, '')
   const tpl = block(src, 'template')
   const scr = block(src, 'script')
   const sty = block(src, 'style')
