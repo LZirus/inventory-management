@@ -121,7 +121,9 @@ export const api = {
   },
 
   async createRestockingOrder(payload) {
-    const response = await axios.post(`${API_BASE_URL}/restocking/orders`, payload)
+    // The budget and every amount the API returns are USD. State that explicitly
+    // so the server can reject an amount in any other currency (audit P0-1).
+    const response = await axios.post(`${API_BASE_URL}/restocking/orders`, { ...payload, currency: 'USD' })
     return response.data
   },
 

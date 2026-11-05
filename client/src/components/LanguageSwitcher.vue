@@ -1,11 +1,21 @@
 <template>
-  <div class="language-switcher">
+  <div
+    ref="rootRef"
+    class="language-switcher"
+    @keydown="onKeydown"
+    @focusout="onFocusout"
+  >
     <button
+      ref="triggerRef"
+      type="button"
       class="language-button"
+      aria-haspopup="menu"
+      :aria-expanded="isDropdownOpen ? 'true' : 'false'"
+      aria-controls="language-menu"
       @click="toggleDropdown"
-      @blur="handleBlur"
     >
       <svg
+        aria-hidden="true"
         width="20"
         height="20"
         viewBox="0 0 20 20"
@@ -19,6 +29,7 @@
       </svg>
       <span class="language-label">{{ localeName }}</span>
       <svg
+        aria-hidden="true"
         class="chevron"
         :class="{ 'chevron-open': isDropdownOpen }"
         width="16"
@@ -30,17 +41,32 @@
       </svg>
     </button>
 
-    <div v-if="isDropdownOpen" class="dropdown-menu">
+    <!-- mousedown.prevent keeps focus where it is while clicking an item, so
+         focusout does not close the menu before the click lands (Safari). -->
+    <div
+      v-if="isDropdownOpen"
+      id="language-menu"
+      ref="menuRef"
+      class="dropdown-menu"
+      role="menu"
+      @mousedown.prevent
+    >
       <button
         v-for="locale in availableLocales"
         :key="locale"
+        type="button"
         class="dropdown-item"
         :class="{ active: currentLocale === locale }"
-        @mousedown.prevent="selectLanguage(locale)"
+        role="menuitemradio"
+        :aria-checked="currentLocale === locale ? 'true' : 'false'"
+        :lang="locale"
+        data-menu-item
+        @click="selectLanguage(locale)"
       >
         <span class="language-name">{{ getLanguageName(locale) }}</span>
         <svg
           v-if="currentLocale === locale"
+          aria-hidden="true"
           width="18"
           height="18"
           viewBox="0 0 18 18"
@@ -55,12 +81,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { useI18n } from '../composables/useI18n'
+import { useDropdownMenu } from '../composables/useDropdownMenu'
 
 const { currentLocale, setLocale, availableLocales, localeName } = useI18n()
 
-const isDropdownOpen = ref(false)
+// Open state, focus handling and keyboard support live in the composable.
+const {
+  isOpen: isDropdownOpen,
+  rootRef,
+  triggerRef,
+  menuRef,
+  toggle: toggleDropdown,
+  close,
+  onKeydown,
+  onFocusout
+} = useDropdownMenu()
 
 const languageNames = {
   en: 'English',
@@ -71,20 +107,10 @@ const getLanguageName = (locale) => {
   return languageNames[locale] || locale
 }
 
-const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value
-}
-
-const handleBlur = () => {
-  // Delay to allow mousedown events on dropdown items to fire first
-  setTimeout(() => {
-    isDropdownOpen.value = false
-  }, 200)
-}
-
 const selectLanguage = (locale) => {
   setLocale(locale)
-  isDropdownOpen.value = false
+  // Hand focus back to the trigger so keyboard users are not left on <body>.
+  close(true)
 }
 </script>
 

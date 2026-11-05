@@ -131,6 +131,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { api } from '../api'
 import { useI18n } from '../composables/useI18n'
+import { formatCurrencyWithDecimals } from '../utils/currency'
 
 // Slider granularity and the step the slider maximum is rounded up to.
 const BUDGET_STEP = 100
@@ -144,7 +145,6 @@ export default {
   setup() {
     const { t, currentCurrency, currentLocale, translateProductName } = useI18n()
 
-    const currencySymbol = computed(() => (currentCurrency.value === 'JPY' ? '¥' : '$'))
     const numberLocale = computed(() => (currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'))
 
     const budget = ref(INITIAL_BUDGET)
@@ -237,13 +237,9 @@ export default {
       }
     }
 
-    const formatMoney = (value, digits = 2) => {
-      const n = Number(value) || 0
-      return currencySymbol.value + n.toLocaleString(numberLocale.value, {
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits
-      })
-    }
+    // All amounts (including the budget, which stays in USD because it is sent
+    // to the API) are USD; the utility converts them for display in JPY.
+    const formatMoney = (value, digits = 2) => formatCurrencyWithDecimals(value, currentCurrency.value, digits)
 
     const formatNumber = (value) => (Number(value) || 0).toLocaleString(numberLocale.value)
 
