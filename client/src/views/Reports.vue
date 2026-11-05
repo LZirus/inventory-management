@@ -161,7 +161,12 @@ export default {
 
     const numberLocale = computed(() => (currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'))
 
+    // Filters can change while a request is in flight; only the latest
+    // request may write results, so a slow stale reply cannot win.
+    let requestSeq = 0
+
     const loadData = async () => {
+      const seq = ++requestSeq
       try {
         loading.value = true
         // Reset so a previous failure does not stick after the filters change
@@ -171,13 +176,15 @@ export default {
           api.getQuarterlyReports(filters),
           api.getMonthlyTrends(filters)
         ])
+        if (seq !== requestSeq) return
         quarterlyData.value = Array.isArray(quarterly) ? quarterly : []
         monthlyData.value = Array.isArray(monthly) ? monthly : []
       } catch (err) {
+        if (seq !== requestSeq) return
         error.value = t('reports.loadError', { message: err.message })
         console.error('Failed to load reports:', err)
       } finally {
-        loading.value = false
+        if (seq === requestSeq) loading.value = false
       }
     }
 
@@ -205,6 +212,8 @@ export default {
     }
 
     const formatPercent = (value) => {
+      // Number(null) is 0, so null/undefined must be caught before converting
+      if (value == null) return t('reports.notAvailable')
       const n = Number(value)
       return Number.isFinite(n) ? `${n}%` : t('reports.notAvailable')
     }

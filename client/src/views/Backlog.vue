@@ -110,7 +110,12 @@ export default {
       return allBacklogItems.value.filter(b => validSkus.has(b.item_sku))
     })
 
+    // Filters can change while a request is in flight; only the latest
+    // request may write results, so a slow stale reply cannot win.
+    let requestSeq = 0
+
     const loadBacklog = async () => {
+      const seq = ++requestSeq
       try {
         loading.value = true
         // Reset so a previous failure does not stick after the filters change
@@ -124,14 +129,16 @@ export default {
             category: filters.category
           })
         ])
+        if (seq !== requestSeq) return
 
         allBacklogItems.value = backlogData
         inventoryItems.value = inventoryData
       } catch (err) {
+        if (seq !== requestSeq) return
         error.value = t('backlog.loadError', { message: err.message })
         console.error('Failed to load backlog:', err)
       } finally {
-        loading.value = false
+        if (seq === requestSeq) loading.value = false
       }
     }
 

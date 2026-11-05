@@ -55,11 +55,21 @@ class TestReportsEndpoints:
         data = client.get(endpoint, params=params).json()
         assert sum(row[count_field] for row in data) == expected
 
-    def test_unfiltered_counts_match_all_orders(self, client):
+    @pytest.mark.parametrize("endpoint,count_field", [(QUARTERLY, "total_orders"), (MONTHLY, "order_count")])
+    def test_unfiltered_counts_match_all_orders(self, client, endpoint, count_field):
         """'all' behaves like no filter."""
         expected = len(client.get("/api/orders").json())
         params = {"warehouse": "all", "category": "all", "status": "all", "month": "all"}
-        assert sum(r["order_count"] for r in client.get(MONTHLY, params=params).json()) == expected
+        assert sum(r[count_field] for r in client.get(endpoint, params=params).json()) == expected
+
+    @pytest.mark.parametrize("endpoint,revenue_field", [(QUARTERLY, "total_revenue"), (MONTHLY, "revenue")])
+    def test_filtered_revenue_matches_orders(self, client, endpoint, revenue_field):
+        """Filters apply to revenue sums too, not only to order counts."""
+        params = {"warehouse": "Tokyo", "category": "Sensors"}
+        expected = sum(o["total_value"] for o in client.get("/api/orders", params=params).json())
+        data = client.get(endpoint, params=params).json()
+        # Per-row revenue is rounded to cents, so allow one cent of drift per row
+        assert sum(row[revenue_field] for row in data) == pytest.approx(expected, abs=0.01 * len(data))
 
     def test_month_filter_limits_monthly_rows(self, client):
         """A single-month filter yields at most one monthly row, for that month."""
