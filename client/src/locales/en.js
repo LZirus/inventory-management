@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -112,6 +113,25 @@ export default {
     onTimeDelivery: 'On-Time Delivery',
     itemsCount: '{count} items',
     quantity: 'Qty',
+    // Restocking orders placed from the Restocking page (stored server-side)
+    submitted: {
+      title: 'Submitted restocking orders',
+      empty: 'No restocking orders yet.',
+      emptyLink: 'Plan one on the Restocking page.',
+      loadError: 'Failed to load restocking orders',
+      status: 'Submitted',
+      leadTimeDays: '{days} days',
+      lineMeta: 'Qty {quantity} at {price}',
+      table: {
+        orderNumber: 'Order number',
+        submittedAt: 'Submitted',
+        items: 'Items',
+        status: 'Status',
+        totalCost: 'Total cost',
+        leadTime: 'Lead time',
+        expectedDelivery: 'Expected delivery'
+      }
+    },
     table: {
       orderNumber: 'Order Number',
       orderId: 'Order ID',
@@ -126,6 +146,46 @@ export default {
       status: 'Status',
       expectedDelivery: 'Expected Delivery',
       actualDelivery: 'Actual Delivery'
+    }
+  },
+
+  // Restocking (budget-driven purchase planning)
+  restocking: {
+    title: 'Restocking',
+    description: 'Plan a purchase order against forecasted demand within a budget',
+    budget: 'Budget',
+    budgetLabel: 'Restocking budget',
+    plannedSpend: 'Planned spend',
+    remaining: 'Remaining',
+    fullRestock: 'Full restock',
+    updating: 'Updating',
+    loadError: 'Failed to load recommendations',
+    noItems: 'The current forecast shows no restocking needs.',
+    recommendedItems: 'Recommended items',
+    linesToOrder: '{count} of {total} items fit the budget',
+    days: '{days} d',
+    notCovered: 'Not covered by the budget',
+    placeOrder: 'Place order',
+    placing: 'Placing order',
+    nothingToOrder: 'Raise the budget to include at least one item.',
+    success: 'Order {number} submitted. Expected delivery {date}.',
+    viewOrders: 'View in orders',
+    submitError: 'The order could not be placed',
+    trends: {
+      increasing: 'Increasing',
+      stable: 'Stable',
+      decreasing: 'Decreasing'
+    },
+    table: {
+      item: 'Item',
+      trend: 'Trend',
+      currentDemand: 'Current demand',
+      forecast: 'Forecast',
+      gap: 'Gap',
+      unitCost: 'Unit cost',
+      quantity: 'Order qty',
+      lineTotal: 'Line total',
+      leadTime: 'Lead time'
     }
   },
 
@@ -190,12 +250,19 @@ export default {
 
   // Filters
   filters: {
-    timePeriod: 'Time Period',
+    timePeriod: 'Time period',
     location: 'Location',
     category: 'Category',
-    orderStatus: 'Order Status',
+    orderStatus: 'Order status',
     all: 'All',
-    allMonths: 'All Months'
+    allMonths: 'All months',
+    filters: 'Filters',
+    activeFilters: 'Active filters',
+    clearAll: 'Clear all',
+    reset: 'Reset',
+    done: 'Done',
+    close: 'Close filters',
+    removeFilter: 'Remove filter {name}'
   },
 
   // Statuses

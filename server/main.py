@@ -1,10 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+import restocking
 
 app = FastAPI(title="Factory Inventory Management System")
+
+restocking.init_db()
 
 # Quarter mapping for date filtering
 QUARTER_MAP = {
@@ -89,6 +92,8 @@ class DemandForecast(BaseModel):
     forecasted_demand: int
     trend: str
     period: str
+    unit_cost: float
+    lead_time_days: int
 
 class BacklogItem(BaseModel):
     id: str
@@ -119,6 +124,52 @@ class CreatePurchaseOrderRequest(BaseModel):
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+class RestockingRecommendationItem(BaseModel):
+    sku: str
+    name: str
+    trend: str
+    current_demand: int
+    forecasted_demand: int
+    gap: int
+    unit_cost: float
+    lead_time_days: int
+    recommended_quantity: int
+    line_total: float
+
+class RestockingRecommendation(BaseModel):
+    budget: float
+    total_cost: float
+    remaining_budget: float
+    full_restock_cost: float
+    items: List[RestockingRecommendationItem]
+
+class RestockingOrderLineRequest(BaseModel):
+    sku: str
+    quantity: int = Field(gt=0)
+
+class CreateRestockingOrderRequest(BaseModel):
+    budget: float = Field(ge=0)
+    items: List[RestockingOrderLineRequest] = Field(min_length=1)
+
+class RestockingOrderLine(BaseModel):
+    sku: str
+    name: str
+    quantity: int
+    unit_cost: float
+    line_total: float
+    lead_time_days: int
+
+class RestockingOrder(BaseModel):
+    id: int
+    order_number: str
+    created_at: str
+    status: str
+    budget: float
+    total_cost: float
+    lead_time_days: int
+    expected_delivery: str
+    items: List[RestockingOrderLine]
 
 # API endpoints
 @app.get("/")
@@ -165,6 +216,35 @@ def get_order(order_id: str):
 def get_demand_forecasts():
     """Get demand forecasts"""
     return demand_forecasts
+
+@app.get("/api/restocking/recommendations", response_model=RestockingRecommendation)
+def get_restocking_recommendations(budget: float = Query(..., ge=0)):
+    """Recommend restock quantities from the demand forecast that fit the given budget"""
+    return restocking.recommend(demand_forecasts, budget)
+
+@app.get("/api/restocking/orders", response_model=List[RestockingOrder])
+def get_restocking_orders():
+    """Get submitted restocking orders, newest first"""
+    return restocking.list_orders()
+
+@app.post("/api/restocking/orders", response_model=RestockingOrder, status_code=201)
+def create_restocking_order(request: CreateRestockingOrderRequest):
+    """Submit a restocking order; prices come from server data, not from the client"""
+    try:
+        lines = restocking.price_order_items(
+            demand_forecasts, [line.model_dump() for line in request.items]
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err))
+
+    total = sum(line["line_total"] for line in lines)
+    # Small tolerance so float rounding of the line totals cannot reject an exact-budget order.
+    if total > request.budget + 0.005:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Order total {total:.2f} exceeds budget {request.budget:.2f}",
+        )
+    return restocking.create_order(lines, request.budget)
 
 @app.get("/api/backlog", response_model=List[BacklogItem])
 def get_backlog():

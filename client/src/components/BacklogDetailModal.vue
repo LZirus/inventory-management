@@ -130,7 +130,7 @@ const formatDate = (dateString) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 31, 61, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,9 +139,9 @@ const formatDate = (dateString) => {
 }
 
 .modal-container {
+  box-shadow: 0 8px 24px rgba(0, 31, 61, 0.16);
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius);
   max-width: 700px;
   width: 100%;
   max-height: 90vh;
@@ -155,32 +155,31 @@ const formatDate = (dateString) => {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--c-line);
 }
 
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
+  color: var(--c-ink);
 }
 
 .close-button {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--c-muted);
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: var(--radius);
   transition: all 0.15s ease;
 }
 
 .close-button:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--c-surface-alt);
+  color: var(--c-ink);
 }
 
 .modal-body {
@@ -194,15 +193,15 @@ const formatDate = (dateString) => {
   align-items: center;
   gap: 1.25rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--c-line);
   margin-bottom: 1.5rem;
 }
 
 .shortage-icon {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  border-radius: 12px;
+  background: #dc2626;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -218,23 +217,21 @@ const formatDate = (dateString) => {
 .item-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-ink);
   margin: 0 0 0.5rem 0;
 }
 
 .item-sku {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--c-muted);
   font-family: 'Monaco', 'Courier New', monospace;
 }
 
 .priority-badge {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: var(--radius);
   font-size: 0.875rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
   flex-shrink: 0;
 }
 
@@ -249,8 +246,8 @@ const formatDate = (dateString) => {
 }
 
 .priority-badge.low {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--c-info-bg);
+  color: var(--c-navy);
 }
 
 .shortage-summary {
@@ -262,7 +259,7 @@ const formatDate = (dateString) => {
 
 .summary-card {
   padding: 1.25rem;
-  border-radius: 10px;
+  border-radius: var(--radius);
   border: 2px solid;
 }
 
@@ -279,16 +276,14 @@ const formatDate = (dateString) => {
 .summary-label {
   font-size: 0.813rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--c-muted);
   margin-bottom: 0.5rem;
 }
 
 .summary-value {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-ink);
 }
 
 .summary-card.danger .summary-value {
@@ -314,26 +309,24 @@ const formatDate = (dateString) => {
 .info-label {
   font-size: 0.813rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--c-muted);
 }
 
 .info-value {
   font-size: 0.938rem;
-  color: #0f172a;
+  color: var(--c-ink);
   font-weight: 500;
 }
 
 .info-value.order-id,
 .info-value.sku {
   font-family: 'Monaco', 'Courier New', monospace;
-  color: #2563eb;
+  color: var(--c-blue);
 }
 
 .modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--c-line);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
@@ -341,20 +334,20 @@ const formatDate = (dateString) => {
 
 .btn-secondary {
   padding: 0.625rem 1.25rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  background: var(--c-surface-alt);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
   font-weight: 500;
   font-size: 0.875rem;
-  color: #334155;
+  color: var(--c-ink-2);
   cursor: pointer;
   transition: all 0.15s ease;
   font-family: inherit;
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  background: var(--c-line);
+  border-color: var(--c-line-strong);
 }
 
 /* Modal transition animations */

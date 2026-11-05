@@ -116,90 +116,103 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
+/*
+ * Light sidebar footer variant: flat row with a square navy initials block,
+ * ink text.
+ * The menu opens upward and extends to the right of the sidebar, since it is
+ * wider (280px) than the sidebar itself; on narrow screens it opens downward.
+ */
 .profile-menu {
   position: relative;
 }
 
 .profile-button {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.5rem 0.875rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
   font-family: inherit;
+  color: var(--c-ink-2);
 }
 
 .profile-button:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  color: var(--c-navy);
+  background: var(--c-hover);
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-  color: white;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: var(--c-navy);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.025em;
+  font-weight: 700;
+  font-size: var(--fs-xs);
 }
 
 .profile-name {
-  font-size: 0.875rem;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font-size: var(--fs-sm);
   font-weight: 500;
-  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chevron {
-  color: #64748b;
-  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  color: var(--c-muted);
+  transition: transform 0.15s ease;
+  transform: rotate(180deg);
 }
 
 .chevron-open {
-  transform: rotate(180deg);
+  transform: rotate(0deg);
 }
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
+  bottom: calc(100% + var(--s-1));
+  left: 0;
   min-width: 280px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 31, 61, 0.12);
   z-index: 1000;
   overflow: hidden;
 }
 
 .dropdown-header {
-  padding: 1rem;
+  padding: var(--s-4);
   display: flex;
-  gap: 0.875rem;
+  gap: var(--s-3);
   align-items: center;
-  background: #f8fafc;
 }
 
 .avatar-large {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  background: var(--c-navy);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.025em;
+  font-size: var(--fs-base);
   flex-shrink: 0;
 }
 
@@ -209,15 +222,15 @@ const handleLogout = () => {
 }
 
 .user-name {
-  font-weight: 600;
-  color: #0f172a;
-  font-size: 0.938rem;
-  margin-bottom: 0.25rem;
+  font-weight: 700;
+  color: var(--c-ink);
+  font-size: var(--fs-base);
+  margin-bottom: 2px;
 }
 
 .user-email {
-  font-size: 0.813rem;
-  color: #64748b;
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -225,57 +238,76 @@ const handleLogout = () => {
 
 .dropdown-divider {
   height: 1px;
-  background: #e2e8f0;
-  margin: 0.5rem 0;
+  background: var(--c-line);
+  margin: var(--s-1) 0;
 }
 
 .dropdown-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  gap: var(--s-3);
+  padding: 10px var(--s-4);
   background: none;
   border: none;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background-color 0.15s ease;
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
   font-weight: 500;
-  color: #334155;
+  color: var(--c-ink-2);
 }
 
 .dropdown-item:hover {
-  background: #f8fafc;
+  background: var(--c-hover);
 }
 
 .dropdown-item svg {
-  color: #64748b;
+  color: var(--c-muted);
   flex-shrink: 0;
 }
 
-.dropdown-item.logout {
-  color: #dc2626;
-}
-
+.dropdown-item.logout,
 .dropdown-item.logout svg {
-  color: #dc2626;
+  color: var(--c-danger);
 }
 
 .dropdown-item.logout:hover {
-  background: #fef2f2;
+  background: var(--c-danger-bg);
 }
 
+/* Plain count, no pill. */
 .task-badge {
   margin-left: auto;
-  background: #2563eb;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.125rem 0.5rem;
-  border-radius: 12px;
-  min-width: 20px;
-  text-align: center;
+  color: var(--c-blue);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .profile-button {
+    width: auto;
+  }
+
+  .profile-name {
+    display: none;
+  }
+
+  .chevron {
+    transform: none;
+  }
+
+  .chevron-open {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-menu {
+    bottom: auto;
+    top: calc(100% + var(--s-1));
+    left: auto;
+    right: 0;
+  }
 }
 </style>

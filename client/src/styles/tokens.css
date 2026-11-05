@@ -1,0 +1,69 @@
+/*
+ * Design tokens. Palette follows the TRUSTEQ brand colors (navy, ice, blue,
+ * energy lime, gold); typeface is Karla. Components should use these variables
+ * instead of hard-coded hex values.
+ */
+:root {
+  /* Brand */
+  --c-navy: #003366;
+  --c-navy-deep: #001f3d;
+  --c-navy-soft: #004991;
+  --c-blue: #0069d1;
+  --c-blue-hover: #0059b1;
+  --c-lime: #daff7d;
+  --c-gold: #ae9966;
+
+  /* Surfaces */
+  --c-bg: #fcfdfe;          /* ice 50: page background */
+  --c-surface: #ffffff;
+  --c-surface-alt: #f2f6fc; /* ice 200: table headers, hover */
+  --c-surface-tint: #ebf1fb;/* ice 300: selected rows */
+
+  /* Text and lines */
+  --c-ink: #001f3d;
+  --c-ink-2: #40434a;
+  --c-muted: #565963;
+  --c-faint: #888b96;
+  --c-line: #e0e1e3;
+  --c-line-strong: #c3c4c9;
+  --c-hover: rgba(0, 51, 102, 0.04); /* faint navy tint for hover rows/items */
+
+  /* Status (TRUSTEQ success/error ramps, warning uses gold-amber for legibility) */
+  --c-success: #1b8443;
+  --c-success-bg: #def8e8;
+  --c-warning: #a66a00;
+  --c-warning-bg: #fff4dc;
+  --c-danger: #c81e1e;
+  --c-danger-bg: #fee6e6;
+  --c-info: #0069d1;
+  --c-info-bg: #e5edf9;
+
+  /* Shape */
+  --radius: 2px;
+  --radius-none: 0;
+
+  /* Type */
+  --font: 'Karla', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  /* Lexend (TRUSTEQ display substitute): page titles and big figures only */
+  --font-display: 'Lexend', 'Karla', system-ui, sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 15px;
+  --fs-md: 17px;
+  --fs-lg: 22px;
+  --fs-xl: 30px;
+
+  /* Spacing (4px grid) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+
+  /* Layout */
+  --sidebar-w: 240px;
+  --c-sidebar: #f7f9fc; /* a hair off the canvas so the light sidebar still reads as a zone */
+  --focus-ring: 0 0 0 2px var(--c-surface), 0 0 0 4px var(--c-blue);
+}
