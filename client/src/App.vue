@@ -32,7 +32,7 @@
           <span class="nav-label">{{ t('nav.restocking') }}</span>
         </router-link>
         <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
-          <span class="nav-label">Reports</span>
+          <span class="nav-label">{{ t('nav.reports') }}</span>
         </router-link>
       </nav>
       <div class="sidebar-footer">
