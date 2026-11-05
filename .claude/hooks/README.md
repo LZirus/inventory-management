@@ -56,21 +56,6 @@ grep "Tool: Bash" .claude/logs/*.log
 - Lints JavaScript/Vue files with `eslint`
 - Blocks commits if linting fails
 
-### 3. Vue SFC Check (`check-vue-sfc.mjs`)
-
-**Purpose**: Catches broken `.vue` files immediately after Claude edits them, instead of at the next `npm run build`.
-
-**Trigger**: `PostToolUse` on `Edit|Write|MultiEdit`, configured in the shared `.claude/settings.json`. Ignores every file that is not `.vue`.
-
-**What it does**: Parses the edited file and compiles its `<script>` and `<template>` with `vue/compiler-sfc` from `client/node_modules`. Takes about 50 ms. On errors it exits with code 2, so the messages go back to Claude, which fixes the file in the same turn.
-
-**Requirements**: `npm install` in `client/`. Without it the hook skips silently.
-
-**Test manually**:
-```bash
-echo '{"tool_input":{"file_path":"'$PWD'/client/src/views/Restocking.vue"}}' | CLAUDE_PROJECT_DIR=$PWD node .claude/hooks/check-vue-sfc.mjs; echo $?
-```
-
 ## Disabling Hooks
 
 To temporarily disable a hook, you can:

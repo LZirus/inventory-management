@@ -20,9 +20,6 @@ Use the Task tool with these specialized subagents for appropriate tasks:
 - **backend-api-test** skill: Use when writing or modifying tests in `tests/backend` directory with pytest and FastAPI TestClient
 - **vue-component-analyzer** skill: Use to analyze `.vue` files for performance, reuse, size and project-rule issues. Suggest-only; writes `docs/reports/vue-analysis-<date>.md`. Fixes go through vue-expert
 
-### Hooks
-- `.claude/settings.json` runs `.claude/hooks/check-vue-sfc.mjs` after every Edit/Write of a `.vue` file: compiles that one file with `@vue/compiler-sfc` (~50 ms). On a template/script error Claude gets the message and fixes it right away. Skips silently if `client/node_modules` is missing
-
 ### MCP Tools
 - **ALWAYS use GitHub MCP tools** (`mcp__github__*`) for ALL GitHub operations
   - Exception: Local branches only - use `git checkout -b` instead of `mcp__github__create_branch`
