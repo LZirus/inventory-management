@@ -91,3 +91,43 @@ class TestRestockingOrders:
         assert client.post("/api/restocking/orders", json={"budget": 100, "items": []}).status_code == 422
         assert client.post("/api/restocking/orders", json={
             "budget": 100, "items": [{"sku": "GSK-203", "quantity": 0}]}).status_code == 422
+
+
+class TestRestockingInputLimits:
+    """Absurd inputs are rejected with 422 instead of crashing or being stored (audit P0-4)."""
+
+    @pytest.mark.parametrize("budget", ["inf", "-inf", "nan", "1e30"])
+    def test_recommendation_rejects_non_finite_or_huge_budget(self, client, budget):
+        response = client.get(f"/api/restocking/recommendations?budget={budget}")
+        assert response.status_code == 422
+
+    def test_order_rejects_huge_quantity(self, client):
+        response = client.post("/api/restocking/orders", json={
+            "budget": 1000, "items": [{"sku": "GSK-203", "quantity": 10**29}]})
+        assert response.status_code == 422
+        assert client.get("/api/restocking/orders").json() == []
+
+    def test_order_rejects_huge_budget(self, client):
+        response = client.post("/api/restocking/orders", json={
+            "budget": 1e300, "items": [{"sku": "GSK-203", "quantity": 1}]})
+        assert response.status_code == 422
+
+    def test_order_rejects_too_many_lines(self, client):
+        items = [{"sku": f"X-{i}", "quantity": 1} for i in range(101)]
+        response = client.post("/api/restocking/orders", json={"budget": 1000, "items": items})
+        assert response.status_code == 422
+
+
+class TestRestockingCurrency:
+    """Order amounts are USD only (audit P0-1, server side)."""
+
+    def test_usd_is_accepted_and_default(self, client):
+        for payload in [{}, {"currency": "USD"}]:
+            response = client.post("/api/restocking/orders", json={
+                "budget": 100, "items": [{"sku": "GSK-203", "quantity": 1}], **payload})
+            assert response.status_code == 201
+
+    def test_other_currency_is_rejected(self, client):
+        response = client.post("/api/restocking/orders", json={
+            "budget": 100, "currency": "JPY", "items": [{"sku": "GSK-203", "quantity": 1}]})
+        assert response.status_code == 422

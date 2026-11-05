@@ -148,7 +148,7 @@
                 <div class="h-bar-label">{{ translateCategory(cat.name) }}</div>
                 <div class="h-bar-container">
                   <div class="h-bar" :style="{ width: (cat.value / maxCategoryValue * 100) + '%', background: cat.color }">
-                    <span class="h-bar-value">{{ selectedCurrency === 'JPY' ? formatCurrency(cat.value, selectedCurrency) : `$${(cat.value / 1000).toFixed(1)}K` }}</span>
+                    <span class="h-bar-value">{{ formatCurrencyCompact(cat.value, selectedCurrency) }}</span>
                   </div>
                 </div>
               </div>
@@ -301,7 +301,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
-import { formatCurrency } from '../utils/currency'
+import { formatCurrency, formatCurrencyCompact } from '../utils/currency'
 import ProductDetailModal from '../components/ProductDetailModal.vue'
 import BacklogDetailModal from '../components/BacklogDetailModal.vue'
 
@@ -349,12 +349,8 @@ export default {
       return monthlyGoal // $800,000 for a single month
     })
 
-    const revenueGoalDisplay = computed(() => {
-      if (revenueGoal.value >= 1000000) {
-        return `$${(revenueGoal.value / 1000000).toFixed(1)}M`
-      }
-      return `$${(revenueGoal.value / 1000).toFixed(0)}K`
-    })
+    // Goal is defined in USD; the compact formatter converts it for JPY.
+    const revenueGoalDisplay = computed(() => formatCurrencyCompact(revenueGoal.value, currentCurrency.value))
 
     const statusData = computed(() => {
       const counts = { delivered: 0, shipped: 0, processing: 0, backordered: 0 }
@@ -712,6 +708,7 @@ export default {
       selectedPeriod,
       selectedCurrency: currentCurrency,
       formatCurrency,
+      formatCurrencyCompact,
       Math,
       translateProductName,
       translateWarehouse,

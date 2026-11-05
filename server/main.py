@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
 import restocking
@@ -144,13 +144,23 @@ class RestockingRecommendation(BaseModel):
     full_restock_cost: float
     items: List[RestockingRecommendationItem]
 
+# Upper bounds for restocking input. They are far above any realistic order and only
+# exist so absurd values (inf, NaN, 1e29 units, huge item lists) are rejected with a 422
+# instead of crashing the recommendation math or being stored.
+MAX_RESTOCK_BUDGET = 10_000_000
+MAX_RESTOCK_QUANTITY = 100_000
+MAX_RESTOCK_LINES = 100
+
 class RestockingOrderLineRequest(BaseModel):
-    sku: str
-    quantity: int = Field(gt=0)
+    sku: str = Field(max_length=32)
+    quantity: int = Field(gt=0, le=MAX_RESTOCK_QUANTITY)
 
 class CreateRestockingOrderRequest(BaseModel):
-    budget: float = Field(ge=0)
-    items: List[RestockingOrderLineRequest] = Field(min_length=1)
+    budget: float = Field(ge=0, le=MAX_RESTOCK_BUDGET, allow_inf_nan=False)
+    # All amounts are USD; the client converts only for display. Pinning the currency
+    # makes the contract explicit, so a client that sends yen amounts is rejected.
+    currency: Literal["USD"] = "USD"
+    items: List[RestockingOrderLineRequest] = Field(min_length=1, max_length=MAX_RESTOCK_LINES)
 
 class RestockingOrderLine(BaseModel):
     sku: str
@@ -218,7 +228,9 @@ def get_demand_forecasts():
     return demand_forecasts
 
 @app.get("/api/restocking/recommendations", response_model=RestockingRecommendation)
-def get_restocking_recommendations(budget: float = Query(..., ge=0)):
+def get_restocking_recommendations(
+    budget: float = Query(..., ge=0, le=MAX_RESTOCK_BUDGET, allow_inf_nan=False)
+):
     """Recommend restock quantities from the demand forecast that fit the given budget"""
     return restocking.recommend(demand_forecasts, budget)
 

@@ -132,6 +132,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { formatCurrencyWithDecimals } from '../utils/currency'
 
 // Max bar height in px; must match .bar-container height in the styles below.
 const MAX_BAR_HEIGHT = 200
@@ -154,10 +155,6 @@ export default {
       selectedStatus,
       getCurrentFilters
     } = useFilters()
-
-    const currencySymbol = computed(() => {
-      return currentCurrency.value === 'JPY' ? '¥' : '$'
-    })
 
     const numberLocale = computed(() => (currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'))
 
@@ -188,15 +185,9 @@ export default {
       }
     }
 
-    // Same pattern as Orders.vue: symbol by locale, number formatted by locale.
-    // Number() || 0 guards against null/undefined values from the API.
-    const formatMoney = (value) => {
-      const n = Number(value) || 0
-      return currencySymbol.value + n.toLocaleString(numberLocale.value, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })
-    }
+    // API amounts are USD; the shared utility converts them to JPY for the
+    // Japanese locale (not just a symbol swap). It also guards null/undefined.
+    const formatMoney = (value) => formatCurrencyWithDecimals(value, currentCurrency.value, 2)
 
     const formatChange = (change) => {
       if (change > 0) return '+' + formatMoney(change)
