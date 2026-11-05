@@ -53,3 +53,6 @@ logs/
 
 # Environment variables
 .env
+
+# Restocking SQLite database (local runtime data)
+server/data/*.db
