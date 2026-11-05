@@ -27,6 +27,65 @@
         </div>
       </div>
 
+      <!-- Restocking orders are loaded separately and ignore the global filters
+           (they have no warehouse/category/month dimension). -->
+      <div class="card submitted-orders">
+        <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submitted.title') }} ({{ restockingOrders.length }})</h3>
+        </div>
+        <div v-if="restockingLoading" class="loading">{{ t('common.loading') }}</div>
+        <p v-else-if="restockingError" class="submitted-error">{{ restockingError }}</p>
+        <p v-else-if="restockingOrders.length === 0" class="submitted-empty">
+          {{ t('orders.submitted.empty') }}
+          <router-link to="/restocking">{{ t('orders.submitted.emptyLink') }}</router-link>
+        </p>
+        <div v-else class="table-container">
+          <table class="submitted-table">
+            <thead>
+              <tr>
+                <th>{{ t('orders.submitted.table.orderNumber') }}</th>
+                <th>{{ t('orders.submitted.table.submittedAt') }}</th>
+                <th>{{ t('orders.submitted.table.items') }}</th>
+                <th>{{ t('orders.submitted.table.status') }}</th>
+                <th class="num">{{ t('orders.submitted.table.totalCost') }}</th>
+                <th class="num">{{ t('orders.submitted.table.leadTime') }}</th>
+                <th>{{ t('orders.submitted.table.expectedDelivery') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in restockingOrders" :key="order.id">
+                <td><strong>{{ order.order_number }}</strong></td>
+                <td>{{ formatDate(order.created_at) }}</td>
+                <td>
+                  <details class="items-details">
+                    <summary class="items-summary">
+                      {{ t('orders.itemsCount', { count: order.items.length }) }}
+                    </summary>
+                    <div class="items-dropdown">
+                      <div v-for="line in order.items" :key="line.sku" class="item-entry">
+                        <span class="item-name">{{ translateProductName(line.name) }}</span>
+                        <span class="item-meta num-inline">
+                          {{ line.sku }} &middot; {{ t('orders.submitted.lineMeta', { quantity: line.quantity, price: formatMoney(line.unit_cost) }) }}
+                        </span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td>
+                  <span class="marker-label">
+                    <span class="marker" aria-hidden="true"></span>
+                    {{ t('orders.submitted.status') }}
+                  </span>
+                </td>
+                <td class="num"><strong>{{ formatMoney(order.total_cost) }}</strong></td>
+                <td class="num">{{ t('orders.submitted.leadTimeDays', { days: order.lead_time_days }) }}</td>
+                <td>{{ formatDate(order.expected_delivery) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
@@ -87,7 +146,7 @@ import { useI18n } from '../composables/useI18n'
 export default {
   name: 'Orders',
   setup() {
-    const { t, currentCurrency, translateProductName, translateCustomerName } = useI18n()
+    const { t, currentCurrency, currentLocale, translateProductName, translateCustomerName } = useI18n()
 
     const currencySymbol = computed(() => {
       return currentCurrency.value === 'JPY' ? '¥' : '$'
@@ -95,6 +154,12 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+
+    // Restocking orders have their own loading/error state so a failure there
+    // never hides the main orders table.
+    const restockingOrders = ref([])
+    const restockingLoading = ref(true)
+    const restockingError = ref(null)
 
     // Use shared filters
     const {
@@ -124,6 +189,28 @@ export default {
       }
     }
 
+    const loadRestockingOrders = async () => {
+      try {
+        restockingLoading.value = true
+        restockingError.value = null
+        // Server already returns newest first
+        restockingOrders.value = await api.getRestockingOrders()
+      } catch (err) {
+        restockingError.value = t('orders.submitted.loadError')
+        console.error('Failed to load restocking orders:', err)
+      } finally {
+        restockingLoading.value = false
+      }
+    }
+
+    const formatMoney = (value) => {
+      const n = Number(value) || 0
+      return currencySymbol.value + n.toLocaleString(currentLocale.value === 'ja' ? 'ja-JP' : 'en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+    }
+
     // Watch for filter changes and reload data
     watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], () => {
       loadOrders()
@@ -144,22 +231,30 @@ export default {
     }
 
     const formatDate = (dateString) => {
-      const { currentLocale } = useI18n()
       const locale = currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'
-      return new Date(dateString).toLocaleDateString(locale, {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return dateString || ''
+      return date.toLocaleDateString(locale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       })
     }
 
-    onMounted(loadOrders)
+    onMounted(() => {
+      loadOrders()
+      loadRestockingOrders()
+    })
 
     return {
       t,
       loading,
       error,
       orders,
+      restockingOrders,
+      restockingLoading,
+      restockingError,
+      formatMoney,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
@@ -210,7 +305,7 @@ export default {
 
 .items-summary {
   cursor: pointer;
-  color: #3b82f6;
+  color: var(--c-blue);
   font-weight: 500;
   list-style: none;
   user-select: none;
@@ -234,7 +329,7 @@ export default {
 }
 
 .items-summary:hover {
-  color: #2563eb;
+  color: var(--c-blue-hover);
   text-decoration: underline;
 }
 
@@ -244,11 +339,10 @@ export default {
   top: 100%;
   left: 0;
   margin-top: 0.5rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 0.75rem;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--radius);
+  padding: var(--s-2);
   z-index: 10;
   min-width: 300px;
   max-width: 400px;
@@ -259,7 +353,7 @@ export default {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--c-line);
 }
 
 .item-entry:last-child {
@@ -269,11 +363,61 @@ export default {
 .item-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--c-ink);
 }
 
 .item-meta {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--c-muted);
+}
+
+/* Submitted restocking orders */
+.submitted-orders {
+  margin-bottom: var(--s-5);
+}
+
+.submitted-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.submitted-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.submitted-empty,
+.submitted-error {
+  margin: 0;
+  padding: var(--s-3) 0;
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
+}
+
+.submitted-error {
+  color: var(--c-danger);
+}
+
+.submitted-empty a {
+  color: var(--c-blue);
+}
+
+.num-inline {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status as an 8px square marker plus text, not a pill */
+.marker-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  white-space: nowrap;
+}
+
+.marker {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  background: var(--c-info);
 }
 </style>

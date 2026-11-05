@@ -492,9 +492,10 @@ export default {
 </script>
 
 <style scoped>
+/* Same spacing and size as .stat-meta so the sub-lines of all KPIs align. */
 .stat-change {
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
+  margin-top: var(--s-2);
+  font-size: var(--fs-sm);
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -527,45 +528,65 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #64748b;
+  color: var(--c-muted);
 }
 
 .legend-dot {
   width: 12px;
   height: 12px;
-  border-radius: 3px;
+  border-radius: var(--radius);
 }
 
-.legend-dot.procurement { background: #3b82f6; }
+.legend-dot.procurement { background: var(--c-blue); }
 .legend-dot.operational { background: #8b5cf6; }
 .legend-dot.labor { background: #10b981; }
 .legend-dot.overhead { background: #f59e0b; }
-.legend-dot.revenue-color { background: #0f172a; }
+.legend-dot.revenue-color { background: var(--c-ink); }
 .legend-dot.cost-color { background: #ef4444; }
 
+/* Four KPIs: one row on wide screens, 2x2 below, so none is left alone in a row. */
 .stats-grid-finance {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-5) var(--s-6);
+  margin-bottom: var(--s-6);
 }
 
-.revenue-card {
-  border-left: 4px solid #0f172a;
+@media (max-width: 1200px) {
+  .stats-grid-finance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.cost-card {
-  border-left: 4px solid #ef4444;
+@media (max-width: 560px) {
+  .stats-grid-finance {
+    grid-template-columns: 1fr;
+  }
 }
 
-.profit-card {
-  border-left: 4px solid #3b82f6;
+/*
+ * Series colour as a small square before the label (matches the chart legend)
+ * instead of a thick left bar, so text keeps the same left edge as other KPIs.
+ */
+.revenue-card .stat-label::before,
+.cost-card .stat-label::before,
+.profit-card .stat-label::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: var(--s-2);
+  vertical-align: 1px;
 }
+
+.revenue-card .stat-label::before { background: var(--c-ink); }
+.cost-card .stat-label::before { background: #ef4444; }
+.profit-card .stat-label::before { background: var(--c-blue); }
 
 .stat-meta {
-  margin-top: 0.5rem;
-  font-size: 0.813rem;
-  color: #64748b;
+  margin-top: var(--s-2);
+  font-size: var(--fs-sm);
+  color: var(--c-muted);
 }
 
 .bar-group-revenue {
@@ -590,14 +611,14 @@ export default {
 .revenue-bar, .cost-bar {
   width: 50%;
   max-width: 30px;
-  border-radius: 6px 6px 0 0;
+  border-radius: var(--radius) var(--radius) 0 0;
   transition: all 0.3s ease;
   cursor: pointer;
   min-height: 4px;
 }
 
 .revenue-bar {
-  background: #0f172a;
+  background: var(--c-ink);
 }
 
 .cost-bar {
@@ -625,8 +646,8 @@ export default {
   justify-content: space-between;
   padding-right: 1rem;
   font-size: 0.75rem;
-  color: #94a3b8;
-  border-right: 1px solid #e2e8f0;
+  color: var(--c-faint);
+  border-right: 1px solid var(--c-line);
 }
 
 .chart-area {
@@ -669,14 +690,14 @@ export default {
 }
 
 .bar-segment:first-child {
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .bar-segment:last-child {
-  border-radius: 6px 6px 0 0;
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 
-.bar-segment.procurement { background: #3b82f6; }
+.bar-segment.procurement { background: var(--c-blue); }
 .bar-segment.operational { background: #8b5cf6; }
 .bar-segment.labor { background: #10b981; }
 .bar-segment.overhead { background: #f59e0b; }
@@ -689,7 +710,7 @@ export default {
   margin-top: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--c-muted);
 }
 
 .two-column-grid {
@@ -718,27 +739,27 @@ export default {
 
 .category-name {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--c-ink);
 }
 
 .category-amount {
   font-weight: 700;
-  color: #2563eb;
+  color: var(--c-blue);
   font-size: 1.125rem;
 }
 
 .category-bar-container {
   width: 100%;
   height: 8px;
-  background: #f1f5f9;
-  border-radius: 4px;
+  background: var(--c-surface-alt);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
 .category-bar {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-  border-radius: 4px;
+  background: var(--c-blue);
+  border-radius: var(--radius);
   transition: width 0.6s ease;
 }
 
@@ -749,7 +770,7 @@ export default {
 }
 
 .percentage {
-  color: #64748b;
+  color: var(--c-muted);
 }
 
 .change {
@@ -782,7 +803,7 @@ export default {
 .transactions-table thead {
   position: sticky;
   top: 0;
-  background: #f8fafc;
+  background: var(--c-surface-alt);
   z-index: 1;
 }
 
@@ -790,11 +811,9 @@ export default {
   text-align: left;
   padding: 0.625rem 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--c-muted);
   font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--c-line);
 }
 
 .transactions-table th.text-right {
@@ -803,7 +822,7 @@ export default {
 
 .transactions-table td {
   padding: 0.75rem 0.75rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--c-surface-alt);
   font-size: 0.875rem;
 }
 
@@ -813,37 +832,37 @@ export default {
 }
 
 .transactions-table tbody tr:hover {
-  background: #f8fafc;
+  background: var(--c-surface-alt);
 }
 
 .transactions-table tbody tr.clickable-row:hover {
-  background: #eff6ff;
+  background: var(--c-info-bg);
 }
 
 .transaction-id {
-  color: #64748b;
+  color: var(--c-muted);
   font-weight: 500;
   font-family: 'Monaco', 'Courier New', monospace;
   font-size: 0.813rem;
 }
 
 .transaction-description {
-  color: #0f172a;
+  color: var(--c-ink);
   font-weight: 500;
 }
 
 .transaction-vendor {
-  color: #64748b;
+  color: var(--c-muted);
 }
 
 .transaction-date {
-  color: #64748b;
+  color: var(--c-muted);
   font-size: 0.813rem;
 }
 
 .transaction-amount {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-ink);
 }
 
 .text-right {

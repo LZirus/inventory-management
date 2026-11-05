@@ -6,6 +6,7 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充発注',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -112,6 +113,25 @@ export default {
     onTimeDelivery: '定時配達',
     itemsCount: '{count}件',
     quantity: '数量',
+    // 補充発注ページから登録された発注（サーバー側に保存）
+    submitted: {
+      title: '登録済みの補充発注',
+      empty: '補充発注はまだありません。',
+      emptyLink: '補充発注ページで作成できます。',
+      loadError: '補充発注の読み込みに失敗しました',
+      status: '登録済み',
+      leadTimeDays: '{days}日',
+      lineMeta: '数量 {quantity}・単価 {price}',
+      table: {
+        orderNumber: '発注番号',
+        submittedAt: '登録日',
+        items: '品目',
+        status: 'ステータス',
+        totalCost: '合計金額',
+        leadTime: 'リードタイム',
+        expectedDelivery: '予定納期'
+      }
+    },
     table: {
       orderNumber: '注文番号',
       orderId: '注文ID',
@@ -126,6 +146,46 @@ export default {
       status: 'ステータス',
       expectedDelivery: '予定配達日',
       actualDelivery: '実際の配達日'
+    }
+  },
+
+  // 補充発注（予算に基づく発注計画）
+  restocking: {
+    title: '補充発注',
+    description: '需要予測に基づき、予算内で発注を計画します',
+    budget: '予算',
+    budgetLabel: '補充発注の予算',
+    plannedSpend: '発注予定額',
+    remaining: '残額',
+    fullRestock: '全量補充',
+    updating: '更新中',
+    loadError: '推奨発注の読み込みに失敗しました',
+    noItems: '現在の需要予測では補充の必要はありません。',
+    recommendedItems: '推奨品目',
+    linesToOrder: '{total}品目中{count}品目が予算内です',
+    days: '{days}日',
+    notCovered: '予算の対象外',
+    placeOrder: '発注する',
+    placing: '発注中',
+    nothingToOrder: '少なくとも1品目を含めるには予算を増やしてください。',
+    success: '発注 {number} を登録しました。予定納期 {date}。',
+    viewOrders: '注文で確認',
+    submitError: '発注できませんでした',
+    trends: {
+      increasing: '増加',
+      stable: '安定',
+      decreasing: '減少'
+    },
+    table: {
+      item: '品目',
+      trend: 'トレンド',
+      currentDemand: '現在の需要',
+      forecast: '予測',
+      gap: '不足',
+      unitCost: '単価',
+      quantity: '発注数',
+      lineTotal: '小計',
+      leadTime: 'リードタイム'
     }
   },
 
@@ -195,7 +255,14 @@ export default {
     category: 'カテゴリ',
     orderStatus: '注文ステータス',
     all: 'すべて',
-    allMonths: 'すべての月'
+    allMonths: 'すべての月',
+    filters: 'フィルター',
+    activeFilters: '適用中のフィルター',
+    clearAll: 'すべて解除',
+    reset: 'リセット',
+    done: '完了',
+    close: 'フィルターを閉じる',
+    removeFilter: 'フィルター「{name}」を解除'
   },
 
   // Statuses
